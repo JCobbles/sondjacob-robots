@@ -14,8 +14,7 @@ int newRound(double x)
   else return (int) x + 1;
 }
 
-int calculateTicks(int distanceInMillimetres)
-{
+int calculateTicks(int distanceInMillimetres) {
   return newRound(distanceInMillimetres / 3.25);
 }
 
@@ -26,30 +25,45 @@ int turn(int degrees)
   drive_goto(ticks, -ticks);
 }
 
-int main()
-{
-    int distance, irLeft, irRight;
-    drive_speed(MAX_SPEED, MAX_SPEED);
-    low(26);
-    low(27);
-    while(true)
-    {
-        freqout(11, 1, 38000);
-        irLeft = input(10);
-        
-        freqout(11, 1, 38000);
-        irRight = input(2);
-        
-        printf("irLeft: %d\n", irLeft);
-        printf("irRight: %d\n", irRight);
-        
-        // Add main loop code here.
-        distance = ping_cm(8);
-        if (distance < 15)
-        {
-            turn(90);
-        }
-        printf("Distance: %d\n\n", distance);
-        drive_goto(calculateTicks(100), calculateTicks(100));
-    }  
+void forwards(int distance) {
+    drive_goto(calculateTicks(distance), calculateTicks(distance));
+}
+
+int irLeft, irRight;
+double Kp = 1;
+
+double calculatePout(int left, int right) {
+  return Kp * (right - left);
+}
+
+int main() {
+  drive_speed(MAX_SPEED, MAX_SPEED);
+  int distance, irLeft, irRight;
+
+  low(26);  
+  low(27);  
+
+  while(1) {
+    irLeft = 0;                                     
+    irRight = 0;                                    
+
+    for(int dacVal = 0; dacVal < 160; dacVal += 8) {                                               
+      dac_ctr(26, 0, dacVal);   
+      freqout(11, 1, 38000);      
+      irLeft += input(10); 
+
+      dac_ctr(27, 1, dacVal);
+      freqout(1, 1, 38000);
+      irRight += input(2);                  
+    }                                               
+
+    print("%c irLeft = %d, irRight = %d%c \n", 
+    HOME,   irLeft, irRight, CLREOL);
+
+    double Pout = calculatePout(irLeft, irRight);
+
+    turn(Pout);
+    forwards(20);
+    pause(100);
+  }
 }
