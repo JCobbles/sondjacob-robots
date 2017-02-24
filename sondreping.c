@@ -64,6 +64,14 @@ int main() {
 
     turn(Pout);
     forwards(20);
-    pause(100);
+    distance = ping_cm(8);
+    if (distance <= 10) {
+        high(26);
+        pause(100);
+        low(26);
+        break;
+    }
+    
+    pause(10);
   }
 }
