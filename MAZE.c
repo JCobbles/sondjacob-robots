@@ -10,6 +10,10 @@
 #define ONCE 1
 #define TWICE 2
 #define PATH 3
+#define NORTH 0
+#define SOUTH 2
+#define EAST 1
+#define WEST 3
 
 #define MAX_SPEED 128 // in ticks / sec
 #define FWD 40
@@ -47,6 +51,44 @@ void forwards(int distance) {
 
 Square* current_pos;
 
+int reverseDirection(int direction) {
+    return (direction - 2) % 4;
+}
+
+int isRightDirection(Square* square) {
+    return square->visited == ONCE || square->visited == PATH;
+}
+
+void move(int direction) {
+    switch (direction) {
+        case NORTH:
+            break;
+        case EAST:
+            break;
+        case SOUTH:
+            break;
+        case WEST:
+            break;
+    }
+}
+
+void returnJourney() {
+    while (1) {
+        if (isRightDirection(current->south)) {
+            current = current->south;
+            move(SOUTH);
+        } else if (isRightDirection(current->west)) {
+            current = current->west;
+            move(WEST);
+        } else if (isRightDirection(current->north)) {
+            current = current->north;
+            move(NORTH);
+        } else if (isRightDirection(current->east)) {
+            current = current->east;
+            move(EAST);
+        }
+    }
+}
 
 int main() {
     int distance, irLeft, irRight;
@@ -67,11 +109,6 @@ int main() {
             freqout(1, 1, 38000);
             irRight += input(2);                  
         }
-        
-        
-        
     }
     
-    
 }
-
