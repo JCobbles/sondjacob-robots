@@ -23,7 +23,7 @@
 #define RIGHT 2
 
 #define MAX_SPEED 128 // in ticks / sec
-#define FWD 400
+#define FWD 420
 
 int currentDirection = NORTH;
 
@@ -187,13 +187,13 @@ int main() {
                 current_pos->visited++;
                 break;
             case WEST:
-                turn(90);
+                turn(-90);
                 current_pos = current_pos->west;
                 current_pos->east = temp;
                 current_pos->visited++;
                 break;
             case EAST:
-                turn(-90);
+                turn(90);
                 current_pos = current_pos->east;
                 current_pos->west = temp;
                 current_pos->visited++;
