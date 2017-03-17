@@ -23,7 +23,7 @@
 #define RIGHT 2
 
 #define MAX_SPEED 128 // in ticks / sec
-#define FWD 40
+#define FWD 400
 
 int currentDirection = NORTH;
 
@@ -202,7 +202,8 @@ int main() {
                 turn(180);
                 break;
         }
+        printf("Iteration complete\n");
+        forwards(FWD);
     }
-    printf("Iteration complete\n");
-    forwards(FWD);
+    
 }
