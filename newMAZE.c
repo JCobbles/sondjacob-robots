@@ -174,25 +174,26 @@ int main() {
             case NORTH:
                 current_pos = current_pos->north;
                 current_pos->south = temp;
-                current_pos->visited++;
+                current_pos->visited = ONCE;
                 break;
             case WEST:
                 turn(-90);
                 current_pos = current_pos->west;
                 current_pos->east = temp;
-                current_pos->visited++;
+                current_pos->visited = ONCE;
                 break;
             case EAST:
                 turn(90);
                 current_pos = current_pos->east;
                 current_pos->west = temp;
-                current_pos->visited++;
+                current_pos->visited = ONCE;
                 break;
             case NO_UNVISITED_PATH:
                 turn(180);
                 break;
         }
+        printf("Iteration complete\n");
+        forwards(FWD);
     }
-    printf("Iteration complete\n");
-    forwards(FWD); 
+     
 }
