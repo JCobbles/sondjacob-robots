@@ -51,6 +51,54 @@ void forwards(int distance) {
     drive_goto(calculateTicks(distance), calculateTicks(distance));
 }
 
+
+int reverseDirection(int direction) {
+    return (direction - 2) % 4;
+}
+
+int calculateCardinalDirection(int localDirection) {
+    if (localDirection == FORWARDS) return currentDirection;
+    if (localDirection == LEFT) return --currentDirection;
+    return ++currentDirection;
+}
+
+int isRightDirection(Square* square) {
+    return square->visited == ONCE || square->visited == PATH;
+}
+
+void move(int direction) {
+    forwards(40);
+    currentDirection = direction;
+    switch (direction) {
+        case NORTH:
+            break;
+        case EAST:
+            break;
+        case SOUTH:
+            break;
+        case WEST:
+            break;
+    }
+}
+
+void returnJourney() {
+    while (1) {
+        if (isRightDirection(current_pos->south)) {
+            current_pos = current_pos->south;
+            move(SOUTH);
+        } else if (isRightDirection(current_pos->west)) {
+            current_pos = current_pos->west;
+            move(WEST);
+        } else if (isRightDirection(current_pos->north)) {
+            current_pos = current_pos->north;
+            move(NORTH);
+        } else if (isRightDirection(current_pos->east)) {
+            current_pos = current_pos->east;
+            move(EAST);
+        }
+    }
+}
+
 Square* current_pos;
 
 
