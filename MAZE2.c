@@ -18,7 +18,7 @@
 #define SOUTH 2
 
 #define MAX_SPEED 128 // in ticks / sec
-#define FWD 40
+#define FWD 400
 
 typedef struct Square {
     int x : 3;
