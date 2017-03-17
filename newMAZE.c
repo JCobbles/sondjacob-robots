@@ -174,8 +174,6 @@ int main() {
         
         turn(-90);
         
-        
-        
         switch (direction_to_move) {
             Square* temp = current_pos;
             case NORTH:
@@ -198,6 +196,10 @@ int main() {
             case NO_UNVISITED_PATH:
                 turn(180);
                 break;
+        }
+
+        if (current_pos->x == 4 && current_pos->y) {
+            returnJourney();
         }
         printf("Iteration complete\n");
         forwards(FWD);
