@@ -2,7 +2,6 @@
 #include "simpletools.h"
 #include "ping.h"
 #include "abdrive.h"
-#include <stdio.h>
 
 #define true 1
 #define false 0
@@ -12,20 +11,18 @@
 #define TWICE 2
 #define CORRIDOR 3
 
-#define NO_UNVISITED_PATH 0
-#define NORTH 1
+#define NO_UNVISITED_PATH 4
+#define NORTH 0
+#define WEST 3
+#define EAST 1
 #define SOUTH 2
-#define EAST 3
-#define WEST 4
 
 #define FORWARDS 0
 #define LEFT 1
 #define RIGHT 2
 
 #define MAX_SPEED 128 // in ticks / sec
-#define FWD 40
-
-int currentDirection = NORTH;
+#define FWD 400
 
 typedef struct Square {
     int x : 3;
@@ -38,6 +35,8 @@ typedef struct Square {
 } Square;
 
 double radius = 52.9;
+Square* current_pos;
+int currentDirection = NORTH;
 
 int newRound(double x) {
     if (x - (int) x < 0.5) return (int) x;
@@ -57,8 +56,6 @@ void turn(int degrees) {
 void forwards(int distance) {
     drive_goto(calculateTicks(distance), calculateTicks(distance));
 }
-
-Square* current_pos;
 
 int reverseDirection(int direction) {
     return (direction - 2) % 4;
@@ -90,7 +87,7 @@ void move(int direction) {
 }
 
 void returnJourney() {
-    while (true) {
+    while (1) {
         if (isRightDirection(current_pos->south)) {
             current_pos = current_pos->south;
             move(SOUTH);
@@ -108,7 +105,6 @@ void returnJourney() {
 }
 
 int main() {
-    printf("time %d", rand());
     int distance, irLeft, irRight;
     int direction_to_move;
     low(26);  
@@ -117,7 +113,7 @@ int main() {
     current_pos = calloc(1, sizeof(Square));
     current_pos->x = 0;
     current_pos->y = 0;
-    current_pos->visited = ONCE;
+    current_pos->visited = NEVER;
         
     while (true) {
         direction_to_move = NO_UNVISITED_PATH;
@@ -168,7 +164,6 @@ int main() {
             // TODO: convert this to a global position
             current_pos->north = NULL;
         } else if (current_pos->north == NULL) {
-            current_pos->north = calloc(1, sizeof(Square));
             current_pos->north->x = current_pos->x;
             current_pos->north->y = current_pos->y + 1;
             current_pos->north->visited = NEVER;
@@ -182,27 +177,30 @@ int main() {
         switch (direction_to_move) {
             Square* temp = current_pos;
             case NORTH:
+                forwards(FWD);
                 current_pos = current_pos->north;
                 current_pos->south = temp;
                 current_pos->visited++;
                 break;
             case WEST:
                 turn(90);
+                forwards(FWD);
                 current_pos = current_pos->west;
                 current_pos->east = temp;
                 current_pos->visited++;
                 break;
             case EAST:
                 turn(-90);
+                forwards(FWD);
                 current_pos = current_pos->east;
                 current_pos->west = temp;
                 current_pos->visited++;
                 break;
             case NO_UNVISITED_PATH:
                 turn(180);
+                forwards(FWD);
                 break;
         }
     }
     printf("Iteration complete\n");
-    forwards(FWD);
 }
