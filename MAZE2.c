@@ -31,6 +31,7 @@ typedef struct Square {
 } Square;
 
 double radius = 52.9;
+Square* current_pos;
 
 int newRound(double x) {
     if (x - (int) x < 0.5) return (int) x;
@@ -98,9 +99,6 @@ void returnJourney() {
         }
     }
 }
-
-Square* current_pos;
-
 
 int main() {
     int distance, irLeft, irRight;
@@ -202,4 +200,3 @@ int main() {
     }
     printf("Iteration complete\n");
 }
-
