@@ -74,10 +74,6 @@ int isRightDirection(Square* square) {
     return square->visited == ONCE || square->visited == CORRIDOR;
 }
 
-int isRightDirection(Square* square) {
-    return square->visited == ONCE || square->visited == CORRIDOR;
-}
-
 void move(int direction) {
     forwards(40);
     currentDirection = direction;
