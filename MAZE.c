@@ -60,15 +60,6 @@ void forwards(int distance) {
 
 Square* current_pos;
 
-int reverseDirection(int direction) {
-    return (direction - 2) % 4;
-}
-
-int calculateCardinalDirection(int localDirection) {
-    if (localDirection == FORWARDS) return currentDirection;
-    if (localDirection == LEFT) return --currentDirection;
-    return ++currentDirection;
-}
 
 int isRightDirection(Square* square) {
     return square->visited == ONCE || square->visited == CORRIDOR;
@@ -202,8 +193,7 @@ int main() {
                 turn(180);
                 break;
         }
-        printf("Iteration complete\n");
-        forwards(FWD);
     }
-    
+    printf("Iteration complete\n");
+    forwards(FWD); 
 }
