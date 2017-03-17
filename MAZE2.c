@@ -12,10 +12,10 @@
 #define CORRIDOR 3
 
 #define NO_UNVISITED_PATH 0
-#define NORTH 1
-#define WEST 2
-#define EAST 3
-#define SOUTH 4
+#define NORTH 0
+#define WEST 3
+#define EAST 1
+#define SOUTH 2
 
 #define MAX_SPEED 128 // in ticks / sec
 #define FWD 40
