@@ -108,7 +108,7 @@ void returnJourney() {
 }
 
 int main() {
-    int distance, irLeft, irRight;
+    int distance;
     int direction_to_move;
     low(26);  
     low(27);
@@ -121,17 +121,25 @@ int main() {
     while (true) {
         direction_to_move = NO_UNVISITED_PATH;
         
-        for(int dacVal = 0; dacVal < 160; dacVal += 8) {                                               
-            dac_ctr(26, 0, dacVal);   
-            freqout(11, 1, 38000);      
-            irLeft += input(10); 
-
-            dac_ctr(27, 1, dacVal);
-            freqout(1, 1, 38000);
-            irRight += input(2);                  
+        distance = ping_cm(8);
+        if (distance < 30) {
+            // TODO: convert this to a global position
+            current_pos->north = NULL;
+        } else if (current_pos->north == NULL) {
+            current_pos->north = calloc(1, sizeof(Square));
+            current_pos->north->x = current_pos->x;
+            current_pos->north->y = current_pos->y + 1;
+            current_pos->north->visited = NEVER;
+            if (direction_to_move == NO_UNVISITED_PATH) {
+                direction_to_move = NORTH;
+            }
+        } else if (current_pos->north->visited == NEVER && direction_to_move == NO_UNVISITED_PATH) {
+            direction_to_move = NORTH;
         }
-        
-        if (irLeft < 20) {
+
+        turn(-90);
+
+        if (ping_cm(8) < 30) {
             // TODO: convert this to a global position
             // mark that there is a wall to the left
             current_pos->west = NULL;
@@ -146,8 +154,10 @@ int main() {
         else if (current_pos->west->visited == NEVER) {
             direction_to_move = WEST;
         }
+
+        turn(-180);
         
-        if (irRight < 20) {
+        if (ping_cm(8) < 30) {
             // TODO: convert this to a global position
             current_pos->east = NULL;
         } else if (current_pos->east == NULL) {
@@ -162,21 +172,9 @@ int main() {
             direction_to_move = EAST;
         }
         
-        distance = ping_cm(8);
-        if (distance < 20) {
-            // TODO: convert this to a global position
-            current_pos->north = NULL;
-        } else if (current_pos->north == NULL) {
-            current_pos->north = calloc(1, sizeof(Square));
-            current_pos->north->x = current_pos->x;
-            current_pos->north->y = current_pos->y + 1;
-            current_pos->north->visited = NEVER;
-            if (direction_to_move == NO_UNVISITED_PATH) {
-                direction_to_move = NORTH;
-            }
-        } else if (current_pos->north->visited == NEVER && direction_to_move == NO_UNVISITED_PATH) {
-            direction_to_move = NORTH;
-        }
+        turn(-90);
+        
+        
         
         switch (direction_to_move) {
             Square* temp = current_pos;
