@@ -60,10 +60,10 @@ int reverseDirection(int direction) {
     return (direction - 2) % 4;
 }
 
-int translateToCardinal(int localDirection) {
-    if (localDirection == FORWARDS) {
-        return 
-    }
+int calculateCardinalDirection(int localDirection) {
+    if (localDirection == FORWARDS) return currentDirection;
+    if (localDirection == LEFT) return --currentDirection;
+    return ++currentDirection;
 }
 
 int isRightDirection(Square* square) {
@@ -87,27 +87,27 @@ void move(int direction) {
 
 void returnJourney() {
     while (1) {
-        if (isRightDirection(current->south)) {
-            current = current->south;
+        if (isRightDirection(current_pos->south)) {
+            current_pos = current_pos->south;
             move(SOUTH);
-        } else if (isRightDirection(current->west)) {
-            current = current->west;
+        } else if (isRightDirection(current_pos->west)) {
+            current_pos = current_pos->west;
             move(WEST);
-        } else if (isRightDirection(current->north)) {
-            current = current->north;
+        } else if (isRightDirection(current_pos->north)) {
+            current_pos = current_pos->north;
             move(NORTH);
-        } else if (isRightDirection(current->east)) {
-            current = current->east;
+        } else if (isRightDirection(current_pos->east)) {
+            current_pos = current_pos->east;
             move(EAST);
         }
     }
 }
 
 int main() {
+    printf("time %d", rand());
     int distance, irLeft, irRight;
     low(26);  
     low(27);
-    forwards(FWD);
     current_pos = malloc(sizeof(Square));
     current_pos->x = 0;
     current_pos->y = 0;
@@ -122,6 +122,8 @@ int main() {
             freqout(1, 1, 38000);
             irRight += input(2);                  
         }
+
+        forwards(FWD);
     }
     
 }
