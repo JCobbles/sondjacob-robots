@@ -11,11 +11,15 @@
 #define TWICE 2
 #define CORRIDOR 3
 
-#define NO_UNVISITED_PATH 0
+#define NO_UNVISITED_PATH 4
 #define NORTH 0
 #define WEST 3
 #define EAST 1
 #define SOUTH 2
+
+#define FORWARDS 0
+#define LEFT 1
+#define RIGHT 2
 
 #define MAX_SPEED 128 // in ticks / sec
 #define FWD 400
@@ -32,6 +36,7 @@ typedef struct Square {
 
 double radius = 52.9;
 Square* current_pos;
+int currentDirection = NORTH;
 
 int newRound(double x) {
     if (x - (int) x < 0.5) return (int) x;
@@ -52,7 +57,6 @@ void forwards(int distance) {
     drive_goto(calculateTicks(distance), calculateTicks(distance));
 }
 
-
 int reverseDirection(int direction) {
     return (direction - 2) % 4;
 }
@@ -64,7 +68,7 @@ int calculateCardinalDirection(int localDirection) {
 }
 
 int isRightDirection(Square* square) {
-    return square->visited == ONCE || square->visited == PATH;
+    return square->visited == ONCE || square->visited == CORRIDOR;
 }
 
 void move(int direction) {
