@@ -14,9 +14,14 @@
 #define SOUTH 2
 #define EAST 1
 #define WEST 3
+#define FORWARDS 0
+#define LEFT 1
+#define RIGHT 2
 
 #define MAX_SPEED 128 // in ticks / sec
 #define FWD 40
+
+int currentDirection = NORTH;
 
 typedef struct Square {
     int x : 3;
@@ -55,11 +60,19 @@ int reverseDirection(int direction) {
     return (direction - 2) % 4;
 }
 
+int translateToCardinal(int localDirection) {
+    if (localDirection == FORWARDS) {
+        return 
+    }
+}
+
 int isRightDirection(Square* square) {
     return square->visited == ONCE || square->visited == PATH;
 }
 
 void move(int direction) {
+    forwards(40);
+    currentDirection = direction;
     switch (direction) {
         case NORTH:
             break;
