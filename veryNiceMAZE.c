@@ -44,9 +44,17 @@ int calculateTicks(int distanceInMillimetres) {
 }
 
 void turn(int degrees) {
-    double radians = degrees *  PI / 180;
-    int ticks = calculateTicks(radians * radius);
-    drive_goto(ticks, -ticks);
+    if (degrees == 90) {
+        drive_goto(26, -25);
+    } else if (degrees == -90) {
+        drive_goto(-25, 26);
+    } else if (degrees == 180) {
+        drive_goto(52, -50);
+    } else {
+        double radians = degrees *  PI / 180;
+        int ticks = calculateTicks(radians * radius);
+        drive_goto(ticks, -ticks);
+    }
 }
 
 void forwards(int distance) {
