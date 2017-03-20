@@ -11,6 +11,7 @@
 #define ONCE 1
 #define TWICE 2
 #define CORRIDOR 3
+#define UNKNOWN 4
 
 #define NORTH 0
 #define WEST 1
@@ -61,7 +62,8 @@ void forwards(int distance) {
     drive_goto(calculateTicks(distance), calculateTicks(distance));
 }
 
-Square* current_pos, start_pos;
+Square* current_pos;
+Square* start_pos;
 
 int reverseDirection(int direction) {
     return (direction - 2) % 4;
@@ -131,16 +133,40 @@ void returnJourney() {
 
 int direction_to_move, num_free_paths;
 
-Square* getSquare(int x, int y) {
-    /*Square* crawler = start_pos;
-    while (crawler != NULL) {
-        
-    } */
+Square* initGrid() {
+    Square* origin = malloc(sizeof(Square));
+    Square* square = origin;
+    Square* grid[4][4];
+    grid[0][0] = origin;
+    for (int i = 0; i < 4; i++) {
+        Square* leftmost = square;
+        for (int j = 0; j < 4; j++) {
+            square->x = j;
+            square->y = i;
+            square->visited = UNKNOWN;
+            grid[j][i] = square;
+            if (i != 0) {
+                square->south = grid[j][i - 1];
+                grid[j][i - 1]->north = square;
+            }
+            if (j != 3) {
+                Square* temp = square;
+                square->east = malloc(sizeof(Square));
+                square = square->east;
+                square->west = temp;
+            }
+        }
+        leftmost->north = malloc(sizeof(Square));
+        square = leftmost->north;
+    }
+    return origin;
 }
+
+int found_new_path, prev_square_visited;
 
 void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
     if (wall_distance < 10) {
-        move(-20); // back off a little if wall is too close
+        forwards(-20); // back off a little if wall is too close
     }
     int globalDirection = calculateCardinalDirection(localDirection);
     switch (globalDirection) {
@@ -150,19 +176,24 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Detected wall to the north\n");
                 return;
             }
-            if (current_pos->north == NULL) {
-                current_pos->north = calloc(1, sizeof(Square));
-                current_pos->north->x = current_pos->x;
-                current_pos->north->y = current_pos->y + 1;
+            if (current_pos->north->visited == UNKNOWN) {
                 current_pos->north->visited = NEVER;
                 direction_to_move = localDirection;
                 printf("Recorded unvisited square to the north\n");
             }
-            else if (current_pos->north->visited == NEVER || current_pos->north->visited == CORRIDOR) {
+            else if (current_pos->north->visited == NEVER) {
                 direction_to_move = localDirection;
-                printf("Relocated corridor or unvisited square to the north\n");
+                printf("Found unvisited square to the north\n");
             }
-            num_free_paths++;
+            else {
+                if (!found_new_path && prev_square_visited >= current_pos->north->visited) {
+                    direction_to_move = localDirection;
+                    found_new_path = true;
+                } 
+                printf("Found previously visited square to the north\n");
+                return;
+            }
+            found_new_path = true;
             return;
         case WEST:
             if (wall_distance < 40) {
@@ -170,19 +201,24 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Detected wall to the west\n");
                 return;
             }
-            if (current_pos->west == NULL) {
-                current_pos->west = calloc(1, sizeof(Square));
-                current_pos->west->x = current_pos->x - 1;
-                current_pos->west->y = current_pos->y;
+            if (current_pos->west->visited == UNKNOWN) {
                 current_pos->west->visited = NEVER;
                 direction_to_move = localDirection;
                 printf("Recorded unvisited square to the west\n");
             }
-            else if (current_pos->west->visited == NEVER || current_pos->west->visited == CORRIDOR) {
+            else if (current_pos->west->visited == NEVER) {
                 direction_to_move = localDirection;
-                printf("Relocated corridor or unvisited square to the west\n");
+                printf("Found unvisited square to the west\n");
             }
-            num_free_paths++;
+           else {
+                if (!found_new_path && prev_square_visited >= current_pos->west->visited) {
+                    direction_to_move = localDirection;
+                    found_new_path = true;
+                } 
+                printf("Found previously visited square to the west\n");
+                return;
+            }
+            found_new_path = true;
             return;
         case EAST:
             if (wall_distance < 40) {
@@ -190,40 +226,54 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Detected wall to the east\n");
                 return;
             }
-            if (current_pos->east == NULL) {
-                current_pos->east = calloc(1, sizeof(Square));
-                current_pos->east->x = current_pos->x + 1;
-                current_pos->east->y = current_pos->y;
+            if (current_pos->east->visited == UNKNOWN) {
                 current_pos->east->visited = NEVER;
                 direction_to_move = localDirection;
                 printf("Recorded unvisited square to the east\n");
             }
-            else if (current_pos->east->visited == NEVER || current_pos->east->visited == CORRIDOR) {
+            else if (current_pos->east->visited == NEVER) {
                 direction_to_move = localDirection;
-                printf("Relocated corridor or unvisited square to the east\n");
+                printf("Found unvisited square to the east\n");
             }
-            num_free_paths++;
-            return;  
+            else {
+                if (!found_new_path && prev_square_visited >= current_pos->east->visited) {
+                    direction_to_move = localDirection;
+                    found_new_path = true;
+                } 
+                printf("Found previously visited square to the east\n");
+                return;
+            }
+            found_new_path = true;
+            return;
         case SOUTH:
+            if (current_pos->x == 0 && current_pos->y == 0) {
+                printf("Found starting position to the south. Probably don't want to go there lol\n");
+                return;
+            }
             if (wall_distance < 40) {
                 current_pos->south = NULL;
                 printf("Detected wall to the south\n");
                 return;
             }
-            if (current_pos->south == NULL) {
-                current_pos->south = calloc(1, sizeof(Square));
-                current_pos->south->x = current_pos->x;
-                current_pos->south->y = current_pos->y - 1;
+            if (current_pos->south->visited == UNKNOWN) {
                 current_pos->south->visited = NEVER;
                 direction_to_move = localDirection;
                 printf("Recorded unvisited square to the south\n");
             }
-            else if (current_pos->south->visited == NEVER || current_pos->south->visited == CORRIDOR) {
+            else if (current_pos->south->visited == NEVER) {
                 direction_to_move = localDirection;
-                printf("Relocated corridor or unvisited square to the south\n");
+                printf("Found unvisited square to the south\n");
             }
-            num_free_paths++;
-            return; 
+            else {
+                if (!found_new_path && prev_square_visited >= current_pos->south->visited) {
+                    direction_to_move = localDirection;
+                    found_new_path = true;
+                } 
+                printf("Found previously visited square to the south\n");
+                return;
+            }
+            found_new_path = true;
+            return;
     }
 }
 
@@ -231,31 +281,15 @@ int main() {
     low(26);  
     low(27);
     forwards(FWD);
-    start_pos = calloc(1, sizeof(Square));
-    start_pos->x = 0;
-    start_pos->y = 0;
+    start_pos = initGrid();
     start_pos->visited = ONCE;
     current_pos = start_pos;
     currentDirection = NORTH;    
         
     while (true) {
-        printf("\nEntered square (%d, %d)\n", current_pos->x, current_pos->y);
-        printf("NORTH: ");
-        if (current_pos->north == NULL) printf("NULL\n");
-        else printf("(%d, %d)\n", current_pos->north->x, current_pos->north->y);
-        printf("SOUTH: ");
-        if (current_pos->south == NULL) printf("NULL\n");
-        else printf("(%d, %d)\n", current_pos->south->x, current_pos->south->y);
-        printf("WEST: ");
-        if (current_pos->west == NULL) printf("NULL\n");
-        else printf("(%d, %d)\n", current_pos->west->x, current_pos->west->y);
-        printf("EAST: ");
-        if (current_pos->east == NULL) printf("NULL\n\n");
-        else printf("(%d, %d)\n\n", current_pos->east->x, current_pos->east->y);
-        
-        
+        printf("\nEntered square (%d, %d)\n", current_pos->x, current_pos->y);        
         direction_to_move = SOUTH;
-        num_free_paths = 0;
+        found_new_path = false;
         pause(100);
         
         analyseSquare(current_pos, NORTH, ping_cm(8));
@@ -269,10 +303,10 @@ int main() {
         analyseSquare(current_pos, EAST, ping_cm(8));
         pause(100);
         
-        if (num_free_paths == 1) { // if square has only one free path, it is a corridor
+        /* if (num_free_paths == 1) { // if square has only one free path, it is a corridor
             current_pos->visited = CORRIDOR;
             printf("Recorded current square as a corridor\n");
-        }
+        } */
         
         // turn to face appropriate square
         switch (direction_to_move) {
@@ -287,6 +321,7 @@ int main() {
                 break;
         }
         currentDirection = calculateCardinalDirection(direction_to_move);
+        prev_square_visited = current_pos->visited;
         Square* temp = current_pos;
         
         switch (currentDirection) {
@@ -307,7 +342,7 @@ int main() {
                 current_pos->north = temp;
             
         }
-        if (current_pos->visited > TWICE) current_pos->visited = ONCE;
+        if (current_pos->visited < TWICE) current_pos->visited++;
         
         forwards(FWD);
     }
