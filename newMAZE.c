@@ -70,6 +70,11 @@ int reverseDirection(int direction) {
     return (direction - 2) % 4;
 }
 
+int LEFT = 1, RIGHT = 2;
+int calcCardinalDirection(int localDirection) {
+
+}
+
 int calculateCardinalDirection(int localDirection) {
     if (currentDirection == NORTH) return localDirection;
     else if (localDirection == NORTH) return currentDirection;
@@ -116,18 +121,69 @@ void move(int direction) {
 
 void returnJourney() {
     while (true) {
+        if (current_pos->x == 0 && current_pos-> y == 0) {
+            high(26);
+            printf("Reached the beginning again\n");
+            pause(200);
+            low(26);
+            break;
+        }
         if (isRightDirection(current_pos->south)) {
             current_pos = current_pos->south;
-            move(SOUTH);
+            switch (currentDirection) {
+                case NORTH:
+                    turn(180);
+                    break;
+                case WEST:
+                    turn(90);
+                    break;
+                case EAST:
+                    turn(-90);
+                    break;
+            }
+            forwards(FWD);
         } else if (isRightDirection(current_pos->west)) {
             current_pos = current_pos->west;
-            move(WEST);
+            switch (currentDirection) {
+                case NORTH:
+                    turn(180);
+                    break;
+                case WEST:
+                    turn(90);
+                    break;
+                case EAST:
+                    turn(-90);
+                    break;
+            }
+            forwards(FWD);
         } else if (isRightDirection(current_pos->north)) {
             current_pos = current_pos->north;
-            move(NORTH);
+            switch (currentDirection) {
+                case NORTH:
+                    turn(180);
+                    break;
+                case WEST:
+                    turn(90);
+                    break;
+                case EAST:
+                    turn(-90);
+                    break;
+            }
+            forwards(FWD);
         } else if (isRightDirection(current_pos->east)) {
             current_pos = current_pos->east;
-            move(EAST);
+            switch (currentDirection) {
+                case NORTH:
+                    turn(180);
+                    break;
+                case WEST:
+                    turn(90);
+                    break;
+                case EAST:
+                    turn(-90);
+                    break;
+            }
+            forwards(FWD);
         }
     }
 }
@@ -408,5 +464,5 @@ int main() {
         
         forwards(FWD);
     }
-     
+    returnJourney();
 }
