@@ -242,11 +242,11 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Found unvisited square to the north\n");
             }
             else {
-                if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
+                /*if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
                     lowest_visited_option = current_pos->south->visited;
                     direction_to_move = localDirection;
-                }
-                else if (current_pos->north->visited < lowest_visited_option) {
+                }*/
+                if (current_pos->north->visited < lowest_visited_option) {
                     lowest_visited_option = current_pos->north->visited;
                     direction_to_move = localDirection;
                 }
@@ -260,18 +260,18 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Detected wall to the west\n");
                 return;
             }
-            else if (current_pos->west->visited == UNKNOWN || current_pos->west->visited == NEVER) {
+            if (current_pos->west->visited == UNKNOWN || current_pos->west->visited == NEVER) {
                 current_pos->west->visited = NEVER;
                 lowest_visited_option = NEVER;
                 direction_to_move = localDirection;
                 printf("Found unvisited square to the west\n");
             }
             else {
-                if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
+                /*if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
                     lowest_visited_option = current_pos->south->visited;
                     direction_to_move = localDirection;
-                }
-                else if (current_pos->west->visited < lowest_visited_option) {
+                }*/
+                if (current_pos->west->visited < lowest_visited_option) {
                     lowest_visited_option = current_pos->west->visited;
                     direction_to_move = localDirection;
                 }
@@ -292,11 +292,11 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Found unvisited square to the east\n");
             }
             else {
-                if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
+                /*if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
                     lowest_visited_option = current_pos->south->visited;
                     direction_to_move = localDirection;
-                }
-                else if (current_pos->east->visited < lowest_visited_option) {
+                }*/
+                if (current_pos->east->visited < lowest_visited_option) {
                     lowest_visited_option = current_pos->east->visited;
                     direction_to_move = localDirection;
                 }
@@ -317,11 +317,11 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Found unvisited square to the south\n");
             }
             else {
-                if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
+                /*if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
                     lowest_visited_option = current_pos->south->visited;
                     direction_to_move = localDirection;
-                }
-                else if (current_pos->south->visited < lowest_visited_option) {
+                }*/
+                if (current_pos->south->visited < lowest_visited_option) {
                     lowest_visited_option = current_pos->south->visited;
                     direction_to_move = localDirection;
                 }
