@@ -101,21 +101,10 @@ int calculateCardinalDirection(int localDirection) {
 }
 
 int isRightDirection(Square* square) {
-    return square->visited == ONCE || square->visited == CORRIDOR;
-}
-
-void move(int direction) {
-    forwards(40);
-    currentDirection = direction;
-    switch (direction) {
-        case NORTH:
-            break;
-        case EAST:
-            break;
-        case SOUTH:
-            break;
-        case WEST:
-            break;
+    if (square != NULL) {
+        return square->visited == ONCE;
+    } else {
+        return false;
     }
 }
 
@@ -128,38 +117,44 @@ void returnJourney() {
             low(26);
             break;
         }
+        printf("current direction: %d ", currentDirection);
         if (isRightDirection(current_pos->south)) {
+            printf("GOING SOUTH");
             current_pos = current_pos->south;
             switch (currentDirection) {
                 case NORTH:
                     turn(180);
                     break;
                 case WEST:
-                    turn(90);
-                    break;
-                case EAST:
                     turn(-90);
                     break;
+                case EAST:
+                    turn(90);
+                    break;
             }
+            currentDirection = SOUTH;
             forwards(FWD);
         } else if (isRightDirection(current_pos->west)) {
+            printf("GOING WEST");
             current_pos = current_pos->west;
             switch (currentDirection) {
                 case NORTH:
-                    turn(180);
+                    turn(-90);
                     break;
-                case WEST:
+                case SOUTH:
                     turn(90);
                     break;
                 case EAST:
-                    turn(-90);
+                    turn(180);
                     break;
             }
+            currentDirection = WEST;
             forwards(FWD);
         } else if (isRightDirection(current_pos->north)) {
+            printf("GOING NORTH");
             current_pos = current_pos->north;
             switch (currentDirection) {
-                case NORTH:
+                case SOUTH:
                     turn(180);
                     break;
                 case WEST:
@@ -169,20 +164,23 @@ void returnJourney() {
                     turn(-90);
                     break;
             }
+            currentDirection = NORTH;
             forwards(FWD);
         } else if (isRightDirection(current_pos->east)) {
+            printf("GOING EAST");
             current_pos = current_pos->east;
             switch (currentDirection) {
                 case NORTH:
-                    turn(180);
-                    break;
-                case WEST:
-                    turn(90);
-                    break;
-                case EAST:
                     turn(-90);
                     break;
+                case WEST:
+                    turn(180);
+                    break;
+                case SOUTH:
+                    turn(90);
+                    break;
             }
+            currentDirection = EAST;
             forwards(FWD);
         }
     }
