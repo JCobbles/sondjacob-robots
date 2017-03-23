@@ -101,7 +101,7 @@ int prev_direction;
 
 int isRightDirection(Square* square) {
     if (square != NULL) {
-        return square->visited == ONCE;
+        return square->visited == ONCE || square->is_junction;
     } else {
         return false;
     }
@@ -263,7 +263,6 @@ void calculateJourney(Square* position) {
 ////////////////////////////////////////////////
 
 void returnJourney() {
-    prev_direction = currentDirection;
     while (true) {
         if (current_pos->x == 0 && current_pos->y == 0) {
             high(26);
@@ -273,7 +272,7 @@ void returnJourney() {
             break;
         }
         if (ping_cm(8) < 15) forwards(-20);
-        if (isRightDirection(current_pos->south) && prev_direction != NORTH) {
+        if (isRightDirection(current_pos->south) && currentDirection != NORTH) {
             printf("GOING SOUTH\n");
             current_pos = current_pos->south;
             switch (currentDirection) {
@@ -285,11 +284,10 @@ void returnJourney() {
                     break;
                 case EAST:
                     turn(90);
-                    break;
             }
             currentDirection = SOUTH;
             forwards(FWD);
-        } else if (isRightDirection(current_pos->west) && prev_direction != EAST) {
+        } else if (isRightDirection(current_pos->west) && currentDirection != EAST) {
             printf("GOING WEST\n");
             current_pos = current_pos->west;
             switch (currentDirection) {
@@ -301,11 +299,10 @@ void returnJourney() {
                     break;
                 case EAST:
                     turn(180);
-                    break;
             }
             currentDirection = WEST;
             forwards(FWD);
-        } else if (isRightDirection(current_pos->north) && prev_direction != SOUTH) {
+        } else if (isRightDirection(current_pos->north) && currentDirection != SOUTH) {
             printf("GOING NORTH\n");
             current_pos = current_pos->north;
             switch (currentDirection) {
@@ -317,11 +314,10 @@ void returnJourney() {
                     break;
                 case EAST:
                     turn(-90);
-                    break;
             }
             currentDirection = NORTH;
             forwards(FWD);
-        } else if (isRightDirection(current_pos->east) && prev_direction != WEST) {
+        } else if (isRightDirection(current_pos->east) && currentDirection != WEST) {
             printf("GOING EAST\n");
             current_pos = current_pos->east;
             switch (currentDirection) {
@@ -333,21 +329,40 @@ void returnJourney() {
                     break;
                 case SOUTH:
                     turn(-90);
-                    break;
             }
             currentDirection = EAST;
             forwards(FWD);
         }
-        prev_direction = currentDirection;
+        else {
+            printf("Going nowhere... \n");
+            printf("Current direction is %d, pos is %d, %d\n", currentDirection, current_pos->x, current_pos->y);
+            printf("Surrounding squares are \n");
+            if (current_pos->north == NULL) printf("North: NULL\n");
+            else printf("North: open path\n");
+            if (current_pos->west == NULL) printf("West: NULL\n");
+            else printf("West: open path\n");
+            if (current_pos->east == NULL) printf("East: NULL\n");
+            else printf("East: open path\n");
+            if (current_pos->south == NULL) printf("South: NULL\n");
+            else printf("South: open path\n");
+            
+            break;
+        }
+        pause(1000);
     }
 }
 
+void navigateToEnd()
+{
+    
+}
+
 int direction_to_move, num_free_paths;
+Square* grid[4][4];
 
 Square* initGrid() {
     Square* origin = malloc(sizeof(Square));
     Square* square = origin;
-    Square* grid[4][4];
     grid[0][0] = origin;
     for (int i = 0; i < 4; i++) {
         Square* leftmost = square;
@@ -396,10 +411,6 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Found unvisited square to the north\n");
             }
             else {
-                /*if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
-                    lowest_visited_option = current_pos->south->visited;
-                    direction_to_move = localDirection;
-                }*/
                 if (current_pos->north->visited < lowest_visited_option) {
                     lowest_visited_option = current_pos->north->visited;
                     direction_to_move = localDirection;
@@ -421,10 +432,6 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Found unvisited square to the west\n");
             }
             else {
-                /*if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
-                    lowest_visited_option = current_pos->south->visited;
-                    direction_to_move = localDirection;
-                }*/
                 if (current_pos->west->visited < lowest_visited_option) {
                     lowest_visited_option = current_pos->west->visited;
                     direction_to_move = localDirection;
@@ -446,10 +453,6 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Found unvisited square to the east\n");
             }
             else {
-                /*if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
-                    lowest_visited_option = current_pos->south->visited;
-                    direction_to_move = localDirection;
-                }*/
                 if (current_pos->east->visited < lowest_visited_option) {
                     lowest_visited_option = current_pos->east->visited;
                     direction_to_move = localDirection;
@@ -471,10 +474,6 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 printf("Found unvisited square to the south\n");
             }
             else {
-                /*if (current_pos->visited == NEVER && current_pos->south->visited <= lowest_visited_option) {
-                    lowest_visited_option = current_pos->south->visited;
-                    direction_to_move = localDirection;
-                }*/
                 if (current_pos->south->visited < lowest_visited_option) {
                     lowest_visited_option = current_pos->south->visited;
                     direction_to_move = localDirection;
@@ -532,14 +531,14 @@ int main() {
             turned = true;
         
             analyseSquare(current_pos, NORTH, ping_cm(8));
-            turn(-90);
-            pause(100);
-            
-            analyseSquare(current_pos, WEST, ping_cm(8));
-            turn(180);
+            turn(90);
             pause(100);
             
             analyseSquare(current_pos, EAST, ping_cm(8));
+            turn(-180);
+            pause(100);
+            
+            analyseSquare(current_pos, WEST, ping_cm(8));
             pause(100);
             
             if (num_free_paths > 1) { 
@@ -561,16 +560,16 @@ int main() {
         // turn to face appropriate square
         switch (direction_to_move) {
             case NORTH:
-                turn_amount = (turned) ? -90 : 0;
+                turn_amount = (turned) ? 90 : 0;
                 break;
             case WEST:
-                turn_amount = (turned) ? -180 : -90;
+                turn_amount = (turned) ? 0 : -90;
                 break;
             case SOUTH:
-                turn_amount = (turned) ? 90 : 180;
+                turn_amount = (turned) ? -90 : 180;
                 break;
             case EAST:
-                turn_amount = (turned) ? 0 : 90;
+                turn_amount = (turned) ? 180 : 90;
                 break;
         }
         turn(turn_amount);
@@ -590,9 +589,14 @@ int main() {
         currentDirection = calculateCardinalDirection(direction_to_move);
         prev_square = current_pos;
         
-        if (current_pos->x == 3 && current_pos->y == 3) {
+        if (grid[0][3]->visited > NEVER && grid[3][0]->visited > NEVER && grid[3][3]->visited > NEVER) {
             high(26);
-            printf("Reached the end of the maze!\n");
+            printf("Visited all corners of the maze!\n");
+            if (current_pos->x == 3 && current_pos->y == 3) {
+                returnJourney();
+            } else {
+                navigateToEnd();
+            }
             pause(200);
             low(26);
             break;
