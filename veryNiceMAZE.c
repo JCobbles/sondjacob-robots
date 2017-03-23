@@ -107,6 +107,161 @@ int isRightDirection(Square* square) {
     }
 }
 
+Square map = Square[4][4];
+
+//////////////////////////////////////////////
+
+
+#define MAX 16
+
+int intArray[MAX];
+int front = 0;
+int rear = -1;
+int itemCount = 0;
+
+int peek() {
+   return intArray[front];
+}
+
+bool isEmpty() {
+   return itemCount == 0;
+}
+
+bool isFull() {
+   return itemCount == MAX;
+}
+
+int size() {
+   return itemCount;
+}  
+
+void insert(int data) {
+
+   if(!isFull()) {
+	
+      if(rear == MAX-1) {
+         rear = -1;            
+      }       
+
+      intArray[++rear] = data;
+      itemCount++;
+   }
+}
+
+int remove() {
+   int data = intArray[front++];
+	
+   if(front == MAX) {
+      front = 0;
+   }
+	
+   itemCount--;
+   return data;  
+}
+
+
+int initial = 1;
+int waiting = 2;
+int visited = 3;
+int index = 0;
+
+int state[16];
+int adjacencyMatrix[4][4];
+void populate_adjacency_matrix(int x, int y, Square* startPosition) {
+    if (x >= 4 || x < 0) {
+        return;
+    }
+    if (startPosition->north != NULL) {
+        adjacencyMatrix[x][y + 1] = true; 
+        populate_adjacency_matrix(x, y + 1, startPosition->north);
+    }
+    if (startPosition->south != NULL) {
+        adjacencyMatrix[x][y - 1] = true; 
+        populate_adjacency_matrix(x, y - 1, startPosition->south);
+    }
+    if (startPosition->east != NULL) {
+        adjacencyMatrix[x + 1][y] = true; 
+        populate_adjacency_matrix(x + 1, y, startPosition->east);
+    }
+    if (startPosition->west != NULL) {
+        adjacencyMatrix[x - 1][y] = true; 
+        populate_adjacency_matrix(x + 1, y, startPosition->west);
+    }
+}
+void calculateJourney(Square* position) {
+    populate_adjacency_matrix(0, 0, position);
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            printf("%d ", adjacencyMatrix[i][j]);
+        }
+        printf("------");
+    }
+    int from = south;
+
+    if (from != north && start->north != NULL) insert(north);
+    if (from != east && start->east != NULL) insert(east);
+    if (from != west && start->west != NULL) insert(west);
+    index = 2;
+    
+    int current;
+    while (!isEmpty()) {
+        current = remove();
+        printf("%d", current);
+
+        if (from != north && position->north) {
+            insert(north);
+        }
+        if (from != east && position->east) {
+            insert(east);
+        }
+        if (from != west && position->west) {
+            insert(west);
+        }
+        if (from != south && position->south) {
+            insert(south);
+        }
+         if (links[i] != NULL) {
+            switch(i) {
+                case north:
+                    links[i] = NULL;
+                    checkSquare(position->north);
+                    break;
+                case east:
+                    if (position->east->north != NULL) {
+                        links[i] = north;
+                    }
+                    break;
+                case south:
+                if (position->south->south != NULL) {
+                    links[i] = north;
+                }
+                break;
+                case west:
+                if (position->north->north != NULL) {
+                    links[i] = north;
+                }
+                break;
+            }
+        }
+        if (from != north && start->north != NULL) {
+            links[index++] = north;
+        }
+        if (from != east && start->east != NULL) {
+            links[index++] = east;
+        }
+        if (from != south && start->south != NULL) {
+            links[index++] = south;
+        }
+        if (from != west && start->west != NULL) {
+            links[index++] = west;
+        }
+        loopThroughLinks();
+    }
+
+}
+
+////////////////////////////////////////////////
+
 void returnJourney() {
     prev_direction = currentDirection;
     while (true) {
