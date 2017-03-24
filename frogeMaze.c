@@ -12,15 +12,10 @@
 #define TWICE 3
 #define CORRIDOR 4
 
-// #define NORTH 0
-// #define EAST 1
-// #define SOUTH 2
-// #define WEST 3
 #define NORTH 0
-#define WEST 3
 #define EAST 1
 #define SOUTH 2
-
+#define WEST 3
 
 // Queue and BFS:
 const int initial = 1;
@@ -304,64 +299,14 @@ int calculateCardinalDirection(int localDirection) {
 }
 
 void turnGlobal(int direction_to_turn) {
-    switch (direction_to_turn) {
-        case SOUTH:
-            printf("GOING SOUTH\n");
-            switch (currentDirection) {
-                case NORTH:
-                    turn(180);
-                    return;
-                case WEST:
-                    turn(-90);
-                    return;
-                case EAST:
-                    turn(90);
-                    return;
-            }
-            break;
-        case WEST:
-            printf("GOING WEST\n");
-            switch (currentDirection) {
-                case NORTH:
-                    turn(-90);
-                    return;
-                case SOUTH:
-                    turn(90);
-                    return;
-                case EAST:
-                    turn(180);
-                    return;
-            }
-            break;
-        case NORTH:
-            printf("GOING NORTH\n");
-            switch (currentDirection) {
-                case SOUTH:
-                    turn(180);
-                    return;
-                case WEST:
-                    turn(90);
-                    return;
-                case EAST:
-                    turn(-90);
-                    return;
-            }
-            break;
-        case EAST:
-            printf("GOING EAST\n");
-            switch (currentDirection) {
-                case NORTH:
-                    turn(90);
-                    return;
-                case WEST:
-                    turn(180);
-                    return;
-                case SOUTH:
-                    turn(-90);
-                    return;
-            }
-            break;
+    if ((direction_to_turn - 2) % 4 == currentDirection) {
+        turn(180);
+    } else if ((direction_to_turn + 1) % 4 == currentDirection) {
+        turn(-90);
+    } else if ((direction_to_turn - 1) % 4 == currentDirection) {
+        turn(90);
     }
+    printf("GOING %d", direction_to_turn);
 }
 
 int* phaseTwoPath;
