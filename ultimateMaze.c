@@ -18,6 +18,12 @@
 #define EAST 2
 #define SOUTH 3
 
+// Queue and BFS:
+const int initial = 1;
+const int waiting = 2;
+const int visited = 3;
+#define MAX 16
+
 #define MAX_SPEED 128 // in ticks / sec
 #define FWD 420
 
@@ -35,6 +41,16 @@ typedef struct Square {
 } Square;
 
 double radius = 52.9;
+
+// BFS:
+int state[MAX];
+int adjacencyMatrix[MAX][MAX];
+
+// QUEUE:
+int queue[MAX];
+int front = 0;
+int rear = -1;
+int itemCount = 0;
 
 Square* grid[4][4];
 
@@ -70,16 +86,7 @@ void forwards(int distance) {
 Square* current_pos;
 Square* start_pos;
 
-int reverseDirection(int direction) {
-    return (direction - 2) % 4;
-}
 
-#define MAX 16
-
-int intArray[MAX];
-int front = 0;
-int rear = -1;
-int itemCount = 0;
 
 int isEmpty() {
    return itemCount == 0;
@@ -97,13 +104,13 @@ void insert(int data) {
          rear = -1;            
       }       
 
-      intArray[++rear] = data;
+      queue[++rear] = data;
       itemCount++;
    }
 }
 
 int pop() {
-   int data = intArray[front++];
+   int data = queue[front++];
 	
    if(front == MAX) {
       front = 0;
@@ -113,28 +120,26 @@ int pop() {
    return data;  
 }
 
+int convertMovementToDirection(int square1, int square2) {
+    if (square1 - 4 == square2) {
+        return SOUTH;
+    } else if (square1 + 4 == square2) {
+        return NORTH;
+    } else if (square1 - 1 == square2) {
+        return WEST;
+    } else if (square1 + 1 == square2) {
+        return EAST;
+    }
+}
 
-int initial = 1;
-int waiting = 2;
-int visited = 3;
-
-int state[16];
-int adjacencyMatrix[16][16];
-
-
-void calculateJourney(int start) {
+int * calculateJourney(int start, int end) {
     Square* position = grid[0][0];
-    printf("calculating the fucking return journey...\n");
-    // for (int i = 0; i < 16; i++) {
-    //     for (int j = 0; j < 16; j++) {
-    //         printf("%d ", adjacencyMatrix[i][j]);
-    //     }
-    //     printf("------\n");
-    // }
+    printf("calculating froge...\n");
 
     for(int v = 0; v < 16; v++) { // initialise state to initial
         state[v] = initial;
     }
+
     int from = SOUTH;
     insert(start);
     state[start] = waiting;
@@ -151,14 +156,33 @@ void calculateJourney(int start) {
                 insert(i);
                 state[i] = waiting;
                 previous[i] = current;
-                if (i == 15) {
-                    printf("FOUND! printing reverse: \n");
-                    int p = 15;
+                if (i == end) {
+                    printf("FOUND! printing: \n");
+                    int directions[20];
+                    int index = 0;
+                    int p = end;
+                    int lengthOfDirections = 0;
+                    directions[index++] = p;
                     while ((p = previous[p]) != 0) {
-                        printf("%d\n", p);
+                        directions[index++] = p;
+                        lengthOfDirections++;
                     }
-                    // printRecursively(previous);
-                    return;
+                    lengthOfDirections += 2;
+                    directions[index] = start;
+                    int *retArray = malloc(lengthOfDirections);
+                    for (int i = 0; i < lengthOfDirections; i++) {
+                        retArray[i] = directions[index--];
+                        
+                        printf("%d\n", retArray[i]);
+                    }
+                    // Convert list of squares to list of directions
+                    index = 0;
+                    for (int j = 0; j < lengthOfDirections; j+=2) {
+                        printf("direction : %d \n", convertMovementToDirection(retArray[j], retArray[j+1]));
+                        retArray[index++] = convertMovementToDirection(retArray[j], retArray[j+1]);
+                    }
+                    retArray[index] = 69; // stop when you reach 69
+                    return retArray;
                 }
             }
         }
@@ -176,7 +200,7 @@ int convertXYToSquareNumber(int x, int y) {
         case 3:
             return 12 + x;
     }
-    return -14;
+    return 69;
 }
 
 void add_to_adjacency_matrix(int x, int y, int direction, int boolean) {
@@ -206,8 +230,7 @@ void add_to_adjacency_matrix(int x, int y, int direction, int boolean) {
 
 }
 
-
-int * convertSquareNumberToRowColumn(int square) {
+int * convertSquareNumberToXY(int square) {
     static int ret[2];
     if (square > 11) {
         ret[0] = 0;
@@ -677,5 +700,5 @@ int main() {
         forwards(FWD);
     }
     //returnJourney();
-    calculateJourney(0);
+    calculateJourney(0, 15);
 }
