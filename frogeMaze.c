@@ -262,7 +262,6 @@ void add_to_adjacency_matrix(int x, int y, int direction, int boolean) {
     }
     printf("adj[%d][%d] = %d \n",convertXYToSquareNumber(x, y),convertXYToSquareNumber(x_new, y_new),boolean);
     adjacencyMatrix[convertXYToSquareNumber(x, y)][convertXYToSquareNumber(x_new, y_new)] = boolean;
-    adjacencyMatrix[convertXYToSquareNumber(x_new, y_new)][convertXYToSquareNumber(x, y)] = boolean;
 
 }
 
@@ -374,17 +373,20 @@ void turnGlobal(int direction_to_turn) {
     }
 }
 
-int drivePathFast(int* way_back, int length) {
+int* phaseTwoPath;
+int phase_two_length;
+
+int drivePathFast(int length) {
     int forward_sum = 0;
     printf("Current direction is %d\n", currentDirection);
     for (int i = 0; i < length; i++) {
-        if (way_back[i] == currentDirection) {
+        if (phaseTwoPath[i] == currentDirection) {
             forward_sum += FWD;
         } else {
             forwards(forward_sum);
-            turnGlobal(way_back[i]);
+            turnGlobal(phaseTwoPath[i]);
             forward_sum = FWD;
-            currentDirection = way_back[i];
+            currentDirection = phaseTwoPath[i];
         }
     }
     forwards(forward_sum);
@@ -413,16 +415,18 @@ void drivePathSlow(int* way_back) {
     low(26);
 }
 
-void returnJourney() {
-    int* startToEnd = calculateJourney(0, 15);
-    int length;
-    for (length = 0; startToEnd[length] != 69; length++);
-    int endToStart[length + 1];
-    for (int i = 0; i < length; i++) {
-        endToStart[i] = reverseDirection(startToEnd[length - i - 1]);
-    }
-    endToStart[length] = 69;
+void phaseTwo() {
+    currentDirection = reverseDirection(phaseTwoPath[0]);
+    printf("Setting current direction to %d\n", currentDirection);
     
+    turn(180);
+    pause(1000);
+    printf("Initiating phase 2...\n");
+    forwards(FWD);
+    drivePathFast(phase_two_length);
+}
+
+void navigateToStart() {
     
     int irLeft = 0;
     int irRight = 0;
@@ -443,45 +447,18 @@ void returnJourney() {
         pause(2000);
     }
     forwards(-20);
-    printf("Returning to starting position...\n");
-    drivePathSlow(endToStart);
     
-    /*for(int dacVal = 0; dacVal < 160; dacVal += 8) {                                               
-          dac_ctr(26, 0, dacVal);   
-          freqout(11, 1, 38000);      
-          irLeft += input(10); 
-
-          dac_ctr(27, 1, dacVal);
-          freqout(1, 1, 38000);
-          irRight += input(2);                  
-    }                                               
-    Pout = calculatePout(irLeft, irRight);
-    if (getTurnAmount(Pout) > 0) { 
-        turn(Pout);
-        forwards(FWD);
-        pause(2000);
-        turn(-Pout * 0.8);
-    }*/
-    
-    forwards(FWD);
-    
-    currentDirection = reverseDirection(endToStart[length - 1]);
-    printf("Setting current direction to %d\n", currentDirection);
-    
-    turn(180);
-    printf("Initiating phase 2...\n");
-    forwards(FWD);
-    drivePathFast(startToEnd, length);
-}
-
-void navigateToEnd() {
-    int* arr = calculateJourney(convertXYToSquareNumber(current_pos->x, current_pos->y), 15);
-    printf("got to if statement\n");
-    if (*arr > 3) {
-        arr++;
-        printf("first val is gt 3\n");
-    } 
-    drivePathSlow(arr);
+    int* startToMiddle = calculateJourney(1, convertXYToSquareNumber(current_pos->x, current_pos->y));
+    int length;
+    for (length = 0; startToMiddle[length] != 69; length++);
+    int middleToStart[length + 1];
+    for (int i = 0; i < length; i++) {
+        middleToStart[i] = startToMiddle[length - i - 1];
+    }
+    middleToStart[length] = 69;
+    phaseTwoPath = middleToStart;
+    phase_two_length = length;
+    drivePathSlow(middleToStart);
     return;
 }
 
@@ -732,12 +709,8 @@ int main() {
         if (grid[0][3]->visited > NEVER && grid[3][0]->visited > NEVER && grid[3][3]->visited > NEVER) {
             high(26);
             printf("Visited all corners of the maze!\n");
-            if (current_pos->x == 3 && current_pos->y == 3) {
-                break;
-            } else {
-                navigateToEnd();
-            }
-            pause(200);
+            navigateToStart();
+            phaseTwo();
             low(26);
             break;
         }
@@ -762,5 +735,4 @@ int main() {
         
         forwards(FWD);
     }
-    returnJourney();
 }
