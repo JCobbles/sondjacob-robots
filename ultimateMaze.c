@@ -121,6 +121,7 @@ int visited = 3;
 int state[16];
 int adjacencyMatrix[16][16];
 
+
 void calculateJourney(int start) {
     Square* position = grid[0][0];
     printf("calculating the fucking return journey...\n");
@@ -138,6 +139,8 @@ void calculateJourney(int start) {
     insert(start);
     state[start] = waiting;
     int current, i;
+    int previous[20];
+
     while (!isEmpty()) {
         current = pop();
         printf("Current: %d \n", current);
@@ -147,10 +150,19 @@ void calculateJourney(int start) {
             if(adjacencyMatrix[current][i] == true && state[i] == initial) {
                 insert(i);
                 state[i] = waiting;
+                previous[i] = current;
+                if (i == 15) {
+                    printf("FOUND! printing reverse: \n");
+                    int p = 15;
+                    while ((p = previous[p]) != 0) {
+                        printf("%d\n", p);
+                    }
+                    // printRecursively(previous);
+                    return;
+                }
             }
         }
     }
-
 }
 
 int convertXYToSquareNumber(int x, int y) {
