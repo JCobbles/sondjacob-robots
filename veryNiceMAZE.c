@@ -34,6 +34,8 @@ typedef struct Square {
     struct Square* south;
 } Square;
 
+Square* grid[4][4];
+
 double radius = 52.9;
 
 int newRound(double x) {
@@ -107,8 +109,6 @@ int isRightDirection(Square* square) {
     }
 }
 
-Square map = Square[4][4];
-
 //////////////////////////////////////////////
 
 
@@ -123,11 +123,11 @@ int peek() {
    return intArray[front];
 }
 
-bool isEmpty() {
+int isEmpty() {
    return itemCount == 0;
 }
 
-bool isFull() {
+int isFull() {
    return itemCount == MAX;
 }
 
@@ -148,7 +148,7 @@ void insert(int data) {
    }
 }
 
-int remove() {
+int pop() {
    int data = intArray[front++];
 	
    if(front == MAX) {
@@ -163,102 +163,106 @@ int remove() {
 int initial = 1;
 int waiting = 2;
 int visited = 3;
-int index = 0;
 
 int state[16];
-int adjacencyMatrix[4][4];
-void populate_adjacency_matrix(int x, int y, Square* startPosition) {
-    if (x >= 4 || x < 0) {
-        return;
-    }
-    if (startPosition->north != NULL) {
-        adjacencyMatrix[x][y + 1] = true; 
-        populate_adjacency_matrix(x, y + 1, startPosition->north);
-    }
-    if (startPosition->south != NULL) {
-        adjacencyMatrix[x][y - 1] = true; 
-        populate_adjacency_matrix(x, y - 1, startPosition->south);
-    }
-    if (startPosition->east != NULL) {
-        adjacencyMatrix[x + 1][y] = true; 
-        populate_adjacency_matrix(x + 1, y, startPosition->east);
-    }
-    if (startPosition->west != NULL) {
-        adjacencyMatrix[x - 1][y] = true; 
-        populate_adjacency_matrix(x + 1, y, startPosition->west);
-    }
-}
-void calculateJourney(Square* position) {
-    populate_adjacency_matrix(0, 0, position);
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            printf("%d ", adjacencyMatrix[i][j]);
-        }
-        printf("------");
-    }
-    int from = south;
+int adjacencyMatrix[16][16];
 
-    if (from != north && start->north != NULL) insert(north);
-    if (from != east && start->east != NULL) insert(east);
-    if (from != west && start->west != NULL) insert(west);
-    index = 2;
-    
-    int current;
+void calculateJourney(int start) {
+    Square* position = grid[0][0];
+    printf("calculating the fucking return journey...\n");
+    // for (int i = 0; i < 16; i++) {
+    //     for (int j = 0; j < 16; j++) {
+    //         printf("%d ", adjacencyMatrix[i][j]);
+    //     }
+    //     printf("------\n");
+    // }
+
+    for(int v = 0; v < 16; v++) { // initialise state to initial
+        state[v] = initial;
+    }
+    int from = SOUTH;
+    insert(start);
+    state[start] = waiting;
+    int current, i;
     while (!isEmpty()) {
-        current = remove();
-        printf("%d", current);
+        current = pop();
+        printf("Current: %d \n", current);
+        state[current] = visited;
 
-        if (from != north && position->north) {
-            insert(north);
-        }
-        if (from != east && position->east) {
-            insert(east);
-        }
-        if (from != west && position->west) {
-            insert(west);
-        }
-        if (from != south && position->south) {
-            insert(south);
-        }
-         if (links[i] != NULL) {
-            switch(i) {
-                case north:
-                    links[i] = NULL;
-                    checkSquare(position->north);
-                    break;
-                case east:
-                    if (position->east->north != NULL) {
-                        links[i] = north;
-                    }
-                    break;
-                case south:
-                if (position->south->south != NULL) {
-                    links[i] = north;
-                }
-                break;
-                case west:
-                if (position->north->north != NULL) {
-                    links[i] = north;
-                }
-                break;
+        for(i = 0; i < 16; i++) {
+            if(adjacencyMatrix[current][i] == true && state[i] == initial) {
+                insert(i);
+                state[i] = waiting;
             }
         }
-        if (from != north && start->north != NULL) {
-            links[index++] = north;
-        }
-        if (from != east && start->east != NULL) {
-            links[index++] = east;
-        }
-        if (from != south && start->south != NULL) {
-            links[index++] = south;
-        }
-        if (from != west && start->west != NULL) {
-            links[index++] = west;
-        }
-        loopThroughLinks();
     }
 
 }
+
+int convertXYToSquareNumber(int x, int y) {
+    switch (y) {
+        case 0:
+            return 0 + x;
+        case 1:
+            return 4 + x;
+        case 2:
+            return 8 + x;
+        case 3:
+            return 12 + x;
+    }
+    return -14;
+}
+
+void add_to_adjacency_matrix(int x, int y, int direction, int boolean) {
+    int x_new, y_new;
+    switch(direction) {
+        case NORTH:
+            if (y > 2) return;
+            x_new = x;
+            y_new = y + 1;
+            break;
+        case SOUTH:
+            if (y < 1) return;
+            x_new = x;
+            y_new = y - 1;
+        case WEST:
+            if (x < 1) return;
+            x_new = x - 1;
+            y_new = y;
+        case EAST:
+            if (x > 2) return;
+            x_new = x + 1;
+            y_new = y;
+            break;
+    }
+    printf("adj[%d][%d] = %d \n",convertXYToSquareNumber(x, y),convertXYToSquareNumber(x_new, y_new),boolean);
+    adjacencyMatrix[convertXYToSquareNumber(x, y)][convertXYToSquareNumber(x_new, y_new)] = boolean;
+
+}
+
+
+int * convertSquareNumberToRowColumn(int square) {
+    static int ret[2];
+    if (square > 11) {
+        ret[0] = 0;
+        ret[1] = square - 12;
+        return ret;
+    }
+    if (square > 7) {
+        ret[0] = 1;
+        ret[1] = square - 8;
+        return ret;
+    }
+    if (square > 3) {
+        ret[0] = 2;
+        ret[1] = square - 4;
+        return ret;
+    }
+    ret[0] = 3;
+    ret[1] = square - 1;
+    return ret;
+}
+
 
 ////////////////////////////////////////////////
 
@@ -358,7 +362,6 @@ void navigateToEnd()
 }
 
 int direction_to_move, num_free_paths;
-Square* grid[4][4];
 
 Square* initGrid() {
     Square* origin = malloc(sizeof(Square));
@@ -402,6 +405,7 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
             if (wall_distance < 40 || current_pos->north == NULL) {
                 current_pos->north = NULL;
                 printf("Detected wall to the north\n");
+                add_to_adjacency_matrix(current_pos->x, current_pos->y, NORTH, 0);
                 return;
             }
             else if (current_pos->north->visited == UNKNOWN || current_pos->north->visited == NEVER) {
@@ -409,6 +413,7 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 lowest_visited_option = NEVER;
                 direction_to_move = localDirection;
                 printf("Found unvisited square to the north\n");
+                add_to_adjacency_matrix(current_pos->x, current_pos->y, NORTH, 1);
             }
             else {
                 if (current_pos->north->visited < lowest_visited_option) {
@@ -423,6 +428,7 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
             if (wall_distance < 40 || current_pos->west == NULL) {
                 current_pos->west = NULL;
                 printf("Detected wall to the west\n");
+                add_to_adjacency_matrix(current_pos->x, current_pos->y, WEST, 0);
                 return;
             }
             if (current_pos->west->visited == UNKNOWN || current_pos->west->visited == NEVER) {
@@ -430,6 +436,7 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 lowest_visited_option = NEVER;
                 direction_to_move = localDirection;
                 printf("Found unvisited square to the west\n");
+                add_to_adjacency_matrix(current_pos->x, current_pos->y, WEST, 1);
             }
             else {
                 if (current_pos->west->visited < lowest_visited_option) {
@@ -444,6 +451,8 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
             if (wall_distance < 40 || current_pos->east == NULL) {
                 current_pos->east = NULL;
                 printf("Detected wall to the east\n");
+                add_to_adjacency_matrix(current_pos->x, current_pos->y, EAST, 0);
+
                 return;
             }
             else if (current_pos->east->visited == UNKNOWN || current_pos->east->visited == NEVER) {
@@ -451,6 +460,7 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 lowest_visited_option = NEVER;
                 direction_to_move = localDirection;
                 printf("Found unvisited square to the east\n");
+                add_to_adjacency_matrix(current_pos->x, current_pos->y, EAST, 1);
             }
             else {
                 if (current_pos->east->visited < lowest_visited_option) {
@@ -465,6 +475,7 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
             if (wall_distance < 40 || current_pos->south == NULL) {
                 current_pos->south = NULL;
                 printf("Detected wall to the south\n");
+                add_to_adjacency_matrix(current_pos->x, current_pos->y, SOUTH, 0);
                 return;
             }
             else if (current_pos->south->visited == UNKNOWN || current_pos->south->visited == NEVER) {
@@ -472,6 +483,7 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
                 lowest_visited_option = NEVER;
                 direction_to_move = localDirection;
                 printf("Found unvisited square to the south\n");
+                add_to_adjacency_matrix(current_pos->x, current_pos->y, SOUTH, 1);
             }
             else {
                 if (current_pos->south->visited < lowest_visited_option) {
@@ -521,7 +533,7 @@ int main() {
     int turn_amount;
         
     while (true) {
-        printf("\nEntered square (%d, %d)\n", current_pos->x, current_pos->y);        
+        printf("\nEntered square (%d, %d) number %d\n", current_pos->x, current_pos->y, convertXYToSquareNumber(current_pos->x, current_pos->y));        
         direction_to_move = SOUTH;
         turned = false;
         num_free_paths = 0;
@@ -622,5 +634,6 @@ int main() {
         
         forwards(FWD);
     }
-    returnJourney();
+    //returnJourney();
+    calculateJourney(0);
 }
