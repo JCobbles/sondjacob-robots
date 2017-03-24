@@ -1,4 +1,3 @@
-
 #include "simpletools.h"
 #include "ping.h"
 #include "abdrive.h"
@@ -13,10 +12,15 @@
 #define TWICE 3
 #define CORRIDOR 4
 
+// #define NORTH 0
+// #define EAST 1
+// #define SOUTH 2
+// #define WEST 3
 #define NORTH 0
-#define WEST 1
-#define EAST 2
-#define SOUTH 3
+#define WEST 3
+#define EAST 1
+#define SOUTH 2
+
 
 // Queue and BFS:
 const int initial = 1;
@@ -291,25 +295,12 @@ int * convertSquareNumberToXY(int square) {
 int calculateCardinalDirection(int localDirection) {
     if (currentDirection == NORTH) return localDirection;
     else if (localDirection == NORTH) return currentDirection;
-    
     else if (currentDirection == WEST) {
-        switch (localDirection) {
-            case WEST: return SOUTH;
-            case EAST: return NORTH;
-            case SOUTH: return EAST;
-        }
-    } else if (currentDirection == EAST) {
-        switch (localDirection) {
-            case WEST: return NORTH;
-            case EAST: return SOUTH;
-            case SOUTH: return WEST;
-        }
-    } else if (currentDirection == SOUTH) {
-        switch (localDirection) {
-            case WEST: return EAST;
-            case EAST: return WEST;
-            case SOUTH: return NORTH;
-        }
+        return (localDirection - 1) % 4;
+    } else if (currentDirection == EAST) { // 90 degree turn clockwise
+        return (localDirection + 1) % 4;
+    } else if (currentDirection == SOUTH) { // 180 degree turn
+        return (localDirection + 2) % 4;
     }
 }
 
@@ -627,7 +618,9 @@ void analyseSquare(Square* current_pos, int localDirection, int wall_distance) {
 
 int continuePath(Square* current_pos) {
     int way_back = calculateCardinalDirection(SOUTH);
-    for (int i = NORTH; i < SOUTH; i++) {
+    for (int i = NORTH; i <= WEST; i++) {
+        printf("%d\n", i);
+        if (i == SOUTH) continue;
         int globalDirection = calculateCardinalDirection(i);
         switch (globalDirection) {
             case NORTH:
